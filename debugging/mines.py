@@ -17,14 +17,14 @@ class Minesweeper:
         clear_screen()
         print('  ' + ' '.join(str(i) for i in range(self.width)))
         for y in range(self.height):
-            print(str(y) + ' ', end='')  # Corregido, se agrega un espacio después del número
+            print(y, end=' ')
             for x in range(self.width):
                 if reveal or self.revealed[y][x]:
                     if (y * self.width + x) in self.mines:
                         print('*', end=' ')
                     else:
                         count = self.count_mines_nearby(x, y)
-                        print(str(count) if count > 0 else ' ', end=' ')
+                        print(count if count > 0 else ' ', end=' ')
                 else:
                     print('.', end=' ')
             print()
@@ -34,8 +34,9 @@ class Minesweeper:
         for dx in [-1, 0, 1]:
             for dy in [-1, 0, 1]:
                 nx, ny = x + dx, y + dy
-                if 0 <= nx < self.width and 0 <= ny < self.height and (ny * self.width + nx) in self.mines:
-                    count += 1
+                if 0 <= nx < self.width and 0 <= ny < self.height:
+                    if (ny * self.width + nx) in self.mines:
+                        count += 1
         return count
 
     def reveal(self, x, y):
@@ -54,14 +55,21 @@ class Minesweeper:
         while True:
             self.print_board()
             try:
-                x = int(input("Ingrese la coordenada x: "))
-                y = int(input("Ingrese la coordenada y: "))
+                x = int(input("Enter x coordinate: "))
+                y = int(input("Enter y coordinate: "))
+                if x < 0 or x >= self.width or y < 0 or y >= self.height:
+                    print("Coordinates out of range. Please enter valid coordinates.")
+                    continue
                 if not self.reveal(x, y):
                     self.print_board(reveal=True)
-                    print("¡Fin del juego! Has tocado una mina.")
+                    print("Game Over! You hit a mine.")
+                    break
+                elif all(self.revealed[i][j] or (i * self.width + j) in self.mines for i in range(self.height) for j in range(self.width)):
+                    self.print_board(reveal=True)
+                    print("Congratulations! You won!")
                     break
             except ValueError:
-                print("Entrada inválida. Por favor, ingrese solo números.")
+                print("Invalid input. Please enter numbers only.")
 
 if __name__ == "__main__":
     game = Minesweeper()
