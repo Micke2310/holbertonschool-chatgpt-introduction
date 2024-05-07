@@ -12,6 +12,7 @@ class Minesweeper:
         self.mines = set(random.sample(range(width * height), mines))
         self.field = [[' ' for _ in range(width)] for _ in range(height)]
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
+        self.remaining_cells = (width * height) - mines
 
     def print_board(self, reveal=False):
         clear_screen()
@@ -43,6 +44,9 @@ class Minesweeper:
         if (y * self.width + x) in self.mines:
             return False
         self.revealed[y][x] = True
+        self.remaining_cells -= 1
+        if self.remaining_cells == 0:
+            return 'win'
         if self.count_mines_nearby(x, y) == 0:
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
@@ -57,16 +61,14 @@ class Minesweeper:
             try:
                 x = int(input("Enter x coordinate: "))
                 y = int(input("Enter y coordinate: "))
-                if x < 0 or x >= self.width or y < 0 or y >= self.height:
-                    print("Coordinates out of range. Please enter valid coordinates.")
-                    continue
-                if not self.reveal(x, y):
+                result = self.reveal(x, y)
+                if result == False:
                     self.print_board(reveal=True)
                     print("Game Over! You hit a mine.")
                     break
-                elif all(self.revealed[i][j] or (i * self.width + j) in self.mines for i in range(self.height) for j in range(self.width)):
+                elif result == 'win':
                     self.print_board(reveal=True)
-                    print("Congratulations! You won!")
+                    print("Congratulations! You've won the game.")
                     break
             except ValueError:
                 print("Invalid input. Please enter numbers only.")
